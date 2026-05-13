@@ -1,7 +1,16 @@
 import logging
-from typing import Dict, Iterable, List, Optional, Sequence
+from typing import Dict, Iterable, List, Optional, Sequence, Union
 
-from khaba_core.models import Conflict, EgoOutput, FinalDecision, MemoryPattern, SubconsciousOutput
+from khaba_core.models import (
+    CognitiveProfile,
+    Conflict,
+    DecisionContext,
+    EgoOutput,
+    FinalDecision,
+    KeywordSignalSet,
+    MemoryPattern,
+    SubconsciousOutput,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -14,21 +23,28 @@ def _clamp(value: float) -> float:
     return max(0.0, min(1.0, value))
 
 
+def _context_from_input(situation: Union[str, DecisionContext]) -> DecisionContext:
+    if isinstance(situation, DecisionContext):
+        return situation
+    return DecisionContext.from_situation(situation)
+
+
 class Ego:
     """Capa reactiva: busca beneficio inmediato, proteccion e impulso."""
 
-    BENEFIT_WORDS = ("ganar", "dinero", "oportunidad", "rapido", "beneficio", "cliente")
-    RISK_WORDS = ("peligro", "amenaza", "perder", "rechazo", "urgente", "presion")
-    IMPULSE_WORDS = ("ahora", "ya", "inmediato", "lanzar", "responder")
-
-    def __init__(self, logger: Optional[logging.Logger] = None) -> None:
+    def __init__(
+        self,
+        signals: Optional[KeywordSignalSet] = None,
+        logger: Optional[logging.Logger] = None,
+    ) -> None:
+        self.signals = signals or CognitiveProfile.default().signals
         self.logger = logger or LOGGER.getChild("ego")
 
-    def response(self, situation: str) -> EgoOutput:
-        text = situation.lower()
-        benefit_hits = _keyword_hits(text, self.BENEFIT_WORDS)
-        risk_hits = _keyword_hits(text, self.RISK_WORDS)
-        impulse_hits = _keyword_hits(text, self.IMPULSE_WORDS)
+    def response(self, situation: Union[str, DecisionContext]) -> EgoOutput:
+        context = _context_from_input(situation)
+        benefit_hits = _keyword_hits(context.normalized_text, self.signals.benefit_words)
+        risk_hits = _keyword_hits(context.normalized_text, self.signals.risk_words)
+        impulse_hits = _keyword_hits(context.normalized_text, self.signals.impulse_words)
 
         perceived_benefit = _clamp(0.25 + 0.18 * len(benefit_hits))
         perceived_risk = _clamp(0.2 + 0.2 * len(risk_hits))
@@ -57,58 +73,31 @@ class Ego:
                 "impulso": urgency,
             },
         )
-        self.logger.debug("Ego.response input=%r output=%s", situation, output)
+        self.logger.debug("Ego.response input=%r output=%s", context.situation, output)
         return output
 
 
 class Subconsciente:
     """Capa de memoria: detecta patrones previos y modula al ego."""
 
-    DEFAULT_PATTERNS = (
-        MemoryPattern(
-            name="promesa bajo presion",
-            markers=("prometer", "resultados", "urgente", "presion"),
-            bias="caution",
-            weight=0.85,
-            lesson="Las promesas hechas bajo presion suelen romper coherencia futura.",
-        ),
-        MemoryPattern(
-            name="oportunidad con cliente",
-            markers=("cliente", "oferta", "venta", "dinero"),
-            bias="confidence",
-            weight=0.55,
-            lesson="Las oportunidades comerciales funcionan mejor con alcance claro.",
-        ),
-        MemoryPattern(
-            name="limite personal",
-            markers=("agotado", "cansado", "limite", "ansiedad"),
-            bias="boundary",
-            weight=0.75,
-            lesson="Ignorar limites internos produce decisiones reactivas.",
-        ),
-        MemoryPattern(
-            name="riesgo de verdad",
-            markers=("mentir", "ocultar", "manipular", "enganar", "no podemos demostrar"),
-            bias="integrity",
-            weight=0.95,
-            lesson="La falta de verdad erosiona direccion y confianza.",
-        ),
-    )
-
     def __init__(
         self,
         patterns: Optional[Sequence[MemoryPattern]] = None,
         logger: Optional[logging.Logger] = None,
     ) -> None:
-        self.patterns = list(patterns or self.DEFAULT_PATTERNS)
+        self.patterns = list(patterns or CognitiveProfile.default().memory_patterns)
         self.logger = logger or LOGGER.getChild("subconsciente")
 
-    def evaluate(self, situation: str, ego_output: EgoOutput) -> SubconsciousOutput:
-        text = situation.lower()
+    def evaluate(
+        self,
+        situation: Union[str, DecisionContext],
+        ego_output: EgoOutput,
+    ) -> SubconsciousOutput:
+        context = _context_from_input(situation)
         matches = [
             pattern
             for pattern in self.patterns
-            if any(marker in text for marker in pattern.markers)
+            if any(marker in context.normalized_text for marker in pattern.markers)
         ]
 
         bias_weights: Dict[str, float] = {}
@@ -143,7 +132,7 @@ class Subconsciente:
         )
         self.logger.debug(
             "Subconsciente.evaluate input=%r ego=%s output=%s",
-            situation,
+            context.situation,
             ego_output,
             output,
         )
@@ -164,20 +153,26 @@ class Subconsciente:
 class MaestroInterior:
     """Capa de criterio: evalua coherencia, verdad y direccion."""
 
-    TRUTH_RISK_WORDS = ("mentir", "ocultar", "manipular", "enganar", "no podemos demostrar")
-
-    def __init__(self, logger: Optional[logging.Logger] = None) -> None:
+    def __init__(
+        self,
+        truth_risk_words: Optional[Sequence[str]] = None,
+        logger: Optional[logging.Logger] = None,
+    ) -> None:
+        self.truth_risk_words = tuple(
+            truth_risk_words or CognitiveProfile.default().signals.truth_risk_words
+        )
         self.logger = logger or LOGGER.getChild("maestro_interior")
 
     def decide(
         self,
-        situation: str,
+        situation: Union[str, DecisionContext],
         ego_output: EgoOutput,
         subconscious_output: SubconsciousOutput,
         conflicts: Optional[Sequence[Conflict]] = None,
     ) -> FinalDecision:
+        context = _context_from_input(situation)
         conflicts = list(conflicts or [])
-        criteria = self._criteria_scores(situation, ego_output, subconscious_output, conflicts)
+        criteria = self._criteria_scores(context, ego_output, subconscious_output, conflicts)
 
         if subconscious_output.bias == "integrity" or criteria["truth"] < 0.55:
             final_action = (
@@ -223,7 +218,7 @@ class MaestroInterior:
         )
         self.logger.debug(
             "MaestroInterior.decide input=%r ego=%s subconsciente=%s conflicts=%s output=%s",
-            situation,
+            context.situation,
             ego_output,
             subconscious_output,
             conflicts,
@@ -233,13 +228,12 @@ class MaestroInterior:
 
     def _criteria_scores(
         self,
-        situation: str,
+        context: DecisionContext,
         ego_output: EgoOutput,
         subconscious_output: SubconsciousOutput,
         conflicts: Sequence[Conflict],
     ) -> Dict[str, float]:
-        text = situation.lower()
-        truth_risk = bool(_keyword_hits(text, self.TRUTH_RISK_WORDS))
+        truth_risk = bool(_keyword_hits(context.normalized_text, self.truth_risk_words))
         coherence = 0.8
         truth = 0.8
         direction = 0.75

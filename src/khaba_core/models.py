@@ -1,5 +1,44 @@
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List, Sequence
+from typing import Any, Dict, List, Mapping, Optional, Sequence
+
+
+@dataclass(frozen=True)
+class DecisionContext:
+    """Entrada normalizada que todas las capas reciben como contrato comun."""
+
+    situation: str
+    normalized_text: str
+    metadata: Mapping[str, Any] = field(default_factory=dict)
+
+    @classmethod
+    def from_situation(
+        cls,
+        situation: str,
+        metadata: Optional[Mapping[str, Any]] = None,
+    ) -> "DecisionContext":
+        if not situation.strip():
+            raise ValueError("KhabaCore.process requiere una situacion no vacia.")
+        return cls(
+            situation=situation,
+            normalized_text=situation.lower(),
+            metadata=dict(metadata or {}),
+        )
+
+
+@dataclass(frozen=True)
+class KeywordSignalSet:
+    benefit_words: Sequence[str]
+    risk_words: Sequence[str]
+    impulse_words: Sequence[str]
+    truth_risk_words: Sequence[str]
+
+
+@dataclass(frozen=True)
+class TraceEvent:
+    step: str
+    layer: str
+    message: str
+    data: Dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -20,6 +59,62 @@ class MemoryPattern:
     bias: str
     weight: float
     lesson: str
+
+
+@dataclass(frozen=True)
+class CognitiveProfile:
+    """Configuracion inyectable para adaptar el nucleo sin cambiar el codigo."""
+
+    signals: KeywordSignalSet
+    memory_patterns: Sequence[MemoryPattern]
+    conflict_threshold: float = 0.7
+
+    @classmethod
+    def default(cls) -> "CognitiveProfile":
+        return cls(
+            signals=KeywordSignalSet(
+                benefit_words=("ganar", "dinero", "oportunidad", "rapido", "beneficio", "cliente"),
+                risk_words=("peligro", "amenaza", "perder", "rechazo", "urgente", "presion"),
+                impulse_words=("ahora", "ya", "inmediato", "lanzar", "responder", "hoy"),
+                truth_risk_words=(
+                    "mentir",
+                    "ocultar",
+                    "manipular",
+                    "enganar",
+                    "no podemos demostrar",
+                ),
+            ),
+            memory_patterns=(
+                MemoryPattern(
+                    name="promesa bajo presion",
+                    markers=("prometer", "resultados", "urgente", "presion"),
+                    bias="caution",
+                    weight=0.85,
+                    lesson="Las promesas hechas bajo presion suelen romper coherencia futura.",
+                ),
+                MemoryPattern(
+                    name="oportunidad con cliente",
+                    markers=("cliente", "oferta", "venta", "dinero"),
+                    bias="confidence",
+                    weight=0.55,
+                    lesson="Las oportunidades comerciales funcionan mejor con alcance claro.",
+                ),
+                MemoryPattern(
+                    name="limite personal",
+                    markers=("agotado", "cansado", "limite", "ansiedad"),
+                    bias="boundary",
+                    weight=0.75,
+                    lesson="Ignorar limites internos produce decisiones reactivas.",
+                ),
+                MemoryPattern(
+                    name="riesgo de verdad",
+                    markers=("mentir", "ocultar", "manipular", "enganar", "no podemos demostrar"),
+                    bias="integrity",
+                    weight=0.95,
+                    lesson="La falta de verdad erosiona direccion y confianza.",
+                ),
+            ),
+        )
 
 
 @dataclass(frozen=True)
