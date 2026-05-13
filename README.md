@@ -10,11 +10,67 @@ Sistema cognitivo jerarquico con tres capas:
 ## Flujo
 
 ```text
-input -> Ego.response() -> Subconsciente.evaluate() -> MaestroInterior.decide() -> output
+input -> DecisionContext
+      -> Ego.response()
+      -> Subconsciente.evaluate()
+      -> ConflictDetector.detect()
+      -> MaestroInterior.decide()
+      -> FinalDecision
 ```
 
 Cada decision incluye trazabilidad por capa, conflictos detectados y justificacion final del
 maestro interior.
+
+## Arquitectura escalable
+
+- `DecisionContext`: contrato comun de entrada, con texto original, texto normalizado y metadata.
+- `CognitiveProfile`: perfil inyectable con palabras clave, patrones de memoria y umbrales.
+- `Ego`: calcula urgencia, beneficio percibido, riesgo percibido y motivaciones inmediatas.
+- `Subconsciente`: compara la situacion con patrones aprendidos y devuelve sesgo/modulacion.
+- `ConflictDetector`: identifica tensiones explicitas entre impulso, memoria, verdad y proteccion.
+- `MaestroInterior`: aplica criterio final; siempre conserva la autoridad y justifica la decision.
+- `TraceEvent`: bitacora serializable de cada paso para auditoria y depuracion.
+
+El orquestador conserva una API simple:
+
+```python
+from khaba_core import KhabaCore
+
+core = KhabaCore()
+decision = core.process(
+    "Necesitamos lanzar hoy una oferta, pero aun no podemos demostrar los resultados.",
+    metadata={"domain": "ventas"},
+)
+
+print(decision.final_action)
+print(decision.to_dict()["trace"]["execution_log"])
+```
+
+Para escalar el sistema sin tocar las capas, crea un `CognitiveProfile` propio:
+
+```python
+from khaba_core import CognitiveProfile, KhabaCore, KeywordSignalSet, MemoryPattern
+
+profile = CognitiveProfile(
+    signals=KeywordSignalSet(
+        benefit_words=("inversion",),
+        risk_words=("bloqueo",),
+        impulse_words=("hoy",),
+        truth_risk_words=("falso",),
+    ),
+    memory_patterns=(
+        MemoryPattern(
+            name="fatiga ejecutiva",
+            markers=("sobrecarga",),
+            bias="boundary",
+            weight=0.9,
+            lesson="La sobrecarga exige reducir compromiso.",
+        ),
+    ),
+)
+
+core = KhabaCore(profile=profile)
+```
 
 ## Uso en Visual Studio Code
 
