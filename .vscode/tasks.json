@@ -1,0 +1,116 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Khaba Core: crear entorno (.env)",
+      "type": "shell",
+      "command": "test -x .env/bin/python || python3 -m venv .env",
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Khaba Core: ejecutar ejemplo",
+      "type": "shell",
+      "command": "${workspaceFolder}/.env/bin/python",
+      "args": [
+        "${workspaceFolder}/examples/run_decision.py"
+      ],
+      "dependsOn": [
+        "Khaba Core: crear entorno (.env)"
+      ],
+      "options": {
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/src",
+          "KHABA_CORE_LOG_LEVEL": "DEBUG"
+        }
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Khaba Core: ejecutar tests",
+      "type": "shell",
+      "command": "${workspaceFolder}/.env/bin/python",
+      "args": [
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "dependsOn": [
+        "Khaba Core: crear entorno (.env)"
+      ],
+      "options": {
+        "env": {
+          "PYTHONPATH": "${workspaceFolder}/src",
+          "KHABA_CORE_LOG_LEVEL": "INFO"
+        }
+      },
+      "group": {
+        "kind": "test",
+        "isDefault": true
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Git: estado de cambios",
+      "type": "shell",
+      "command": "git",
+      "args": [
+        "status",
+        "--short"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Git: diff sin stage",
+      "type": "shell",
+      "command": "git",
+      "args": [
+        "diff",
+        "--",
+        "."
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    },
+    {
+      "label": "Git: historial reciente",
+      "type": "shell",
+      "command": "git",
+      "args": [
+        "log",
+        "--oneline",
+        "--decorate",
+        "-10"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
+    }
+  ]
+}

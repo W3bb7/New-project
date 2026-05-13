@@ -1,0 +1,32 @@
+{
+  "folders": [
+    {
+      "name": "Khaba Core",
+      "path": "."
+    }
+  ],
+  "settings": {
+    "python.defaultInterpreterPath": "${workspaceFolder}/.env/bin/python",
+    "python.envFile": "${workspaceFolder}/.vscode/python.env",
+    "python.analysis.extraPaths": [
+      "${workspaceFolder}/src"
+    ],
+    "terminal.integrated.cwd": "${workspaceFolder}",
+    "git.enabled": true,
+    "git.autofetch": true,
+    "git.decorations.enabled": true,
+    "git.openRepositoryInParentFolders": "never",
+    "scm.defaultViewMode": "tree",
+    "scm.diffDecorations": "all"
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-python.vscode-pylance",
+      "ms-python.debugpy",
+      "charliermarsh.ruff",
+      "eamodio.gitlens",
+      "tamasfe.even-better-toml"
+    ]
+  }
+}

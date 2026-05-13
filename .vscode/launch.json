@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Khaba Core: ejemplo",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "${workspaceFolder}/examples/run_decision.py",
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "KHABA_CORE_LOG_LEVEL": "DEBUG"
+      },
+      "justMyCode": true
+    },
+    {
+      "name": "Khaba Core: tests",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "unittest",
+      "args": [
+        "discover",
+        "-s",
+        "tests"
+      ],
+      "console": "integratedTerminal",
+      "env": {
+        "PYTHONPATH": "${workspaceFolder}/src",
+        "KHABA_CORE_LOG_LEVEL": "INFO"
+      },
+      "justMyCode": true
+    }
+  ]
+}
