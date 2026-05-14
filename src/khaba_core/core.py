@@ -1,14 +1,15 @@
 import logging
 import os
+from collections.abc import Mapping
 from dataclasses import asdict
-from typing import Any, Dict, List, Mapping, Optional
+from typing import Any, Dict, List, Optional  # noqa: UP035
 
 from khaba_core.layers import Ego, MaestroInterior, Subconsciente
 from khaba_core.models import CognitiveProfile, Conflict, DecisionContext, FinalDecision, TraceEvent
 
 
 class ConflictDetector:
-    """Servicio de dominio que identifica tensiones entre capas."""
+    """Servicio de dominio que identifica tensions entre capas."""
 
     def __init__(
         self,
@@ -51,7 +52,7 @@ class ConflictDetector:
         if ego_output.perceived_risk >= 0.65 and subconscious_output.bias == "confidence":
             conflicts.append(
                 Conflict(
-                    name="proteccion_vs_confianza",
+                    name="protection_vs_confianza",
                     layers=("ego", "subconsciente"),
                     description="El ego percibe amenaza mientras la memoria reconoce oportunidad.",
                     severity=0.65,
@@ -103,7 +104,7 @@ class KhabaCore:
         context = DecisionContext.from_situation(situation, metadata)
         execution_log: List[TraceEvent] = []
 
-        self._record(execution_log, "input", "khaba_core", "Situacion recibida.", {"metadata": dict(context.metadata)})
+        self._record(execution_log, "input", "khaba_core", "Situacion recibida.", {"metadata": dict(context.metadata)})  # noqa: E501
         self.logger.info("KhabaCore input=%r", context.situation)
 
         ego_output = self.ego.response(context)
@@ -124,7 +125,7 @@ class KhabaCore:
             execution_log,
             "subconsciente.evaluate",
             "subconsciente",
-            "Patrones de memoria evaluados.",
+            "Patrons de memoria evaluados.",
             {
                 "bias": subconscious_output.bias,
                 "matched_patterns": list(subconscious_output.matched_patterns),
@@ -138,10 +139,10 @@ class KhabaCore:
             execution_log,
             "conflicts.detect",
             "khaba_core",
-            "Conflictos entre capas detectados.",
+            "Conflicts entre capas detectados.",
             {"conflicts": [asdict(conflict) for conflict in conflicts]},
         )
-        self.logger.info("Conflictos detectados: %s", len(conflicts))
+        self.logger.info("Conflicts detectados: %s", len(conflicts))
 
         decision = self.maestro.decide(
             situation=context,

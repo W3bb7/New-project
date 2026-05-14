@@ -1,5 +1,6 @@
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass, field
-from typing import Any, Dict, List, Mapping, Optional, Sequence
+from typing import Any, Dict, List, Optional  # noqa: UP035
 
 
 @dataclass(frozen=True)
@@ -63,7 +64,7 @@ class MemoryPattern:
 
 @dataclass(frozen=True)
 class CognitiveProfile:
-    """Configuracion inyectable para adaptar el nucleo sin cambiar el codigo."""
+    """Configuration inyectable para adaptar el nucleo sin cambiar el codigo."""
 
     signals: KeywordSignalSet
     memory_patterns: Sequence[MemoryPattern]
@@ -73,7 +74,7 @@ class CognitiveProfile:
     def default(cls) -> "CognitiveProfile":
         return cls(
             signals=KeywordSignalSet(
-                benefit_words=("ganar", "dinero", "oportunidad", "rapido", "beneficio", "cliente"),
+                benefit_words=("ganar", "dinero", "oportunidad", "rapido", "beneficio", "client"),
                 risk_words=("peligro", "amenaza", "perder", "rechazo", "urgente", "presion"),
                 impulse_words=("ahora", "ya", "inmediato", "lanzar", "responder", "hoy"),
                 truth_risk_words=(
@@ -93,25 +94,25 @@ class CognitiveProfile:
                     lesson="Las promesas hechas bajo presion suelen romper coherencia futura.",
                 ),
                 MemoryPattern(
-                    name="oportunidad con cliente",
-                    markers=("cliente", "oferta", "venta", "dinero"),
+                    name="oportunidad con client",
+                    markers=("client", "oferta", "venta", "dinero"),
                     bias="confidence",
                     weight=0.55,
                     lesson="Las oportunidades comerciales funcionan mejor con alcance claro.",
                 ),
                 MemoryPattern(
-                    name="limite personal",
+                    name="limit personal",
                     markers=("agotado", "cansado", "limite", "ansiedad"),
                     bias="boundary",
                     weight=0.75,
-                    lesson="Ignorar limites internos produce decisiones reactivas.",
+                    lesson="Ignorar limites internos produce decisions reactivas.",
                 ),
                 MemoryPattern(
                     name="riesgo de verdad",
                     markers=("mentir", "ocultar", "manipular", "enganar", "no podemos demostrar"),
                     bias="integrity",
                     weight=0.95,
-                    lesson="La falta de verdad erosiona direccion y confianza.",
+                    lesson="La falta de verdad erosiona direction y confianza.",
                 ),
             ),
         )
