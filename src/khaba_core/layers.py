@@ -4,6 +4,7 @@ from typing import Dict, Iterable, List, Optional, Sequence, Union
 from khaba_core.models import (
     CognitiveProfile,
     Conflict,
+    ConflictResolution,
     DecisionContext,
     EgoOutput,
     FinalDecision,
@@ -173,6 +174,7 @@ class MaestroInterior:
         context = _context_from_input(situation)
         conflicts = list(conflicts or [])
         criteria = self._criteria_scores(context, ego_output, subconscious_output, conflicts)
+        resolved_conflicts = self._resolve_conflicts(conflicts, criteria, subconscious_output)
 
         if subconscious_output.bias == "integrity" or criteria["truth"] < 0.55:
             final_action = (
@@ -199,6 +201,10 @@ class MaestroInterior:
             justification.append(
                 "Hay conflicto entre capas; la autoridad final no queda subordinada al impulso."
             )
+        if resolved_conflicts:
+            justification.extend(resolution.rationale for resolution in resolved_conflicts)
+
+        action_plan = self._build_action_plan(final_action, criteria, subconscious_output, conflicts)
 
         decision = FinalDecision(
             final_action=final_action,
@@ -206,6 +212,8 @@ class MaestroInterior:
             confidence=confidence,
             justification=justification,
             conflicts=conflicts,
+            resolved_conflicts=resolved_conflicts,
+            action_plan=action_plan,
             trace={
                 "ego": ego_output,
                 "subconsciente": subconscious_output,
@@ -213,6 +221,8 @@ class MaestroInterior:
                     "criteria": criteria,
                     "selected_action": final_action,
                     "authority": "maestro_interior",
+                    "resolved_conflicts": resolved_conflicts,
+                    "action_plan": action_plan,
                 },
             },
         )
@@ -256,3 +266,69 @@ class MaestroInterior:
             "truth": _clamp(truth),
             "direction": _clamp(direction),
         }
+
+    def _resolve_conflicts(
+        self,
+        conflicts: Sequence[Conflict],
+        criteria: Dict[str, float],
+        subconscious_output: SubconsciousOutput,
+    ) -> List[ConflictResolution]:
+        resolutions: List[ConflictResolution] = []
+        for conflict in conflicts:
+            if conflict.name == "beneficio_vs_verdad" or criteria["truth"] < 0.55:
+                ruling = "priorizar verdad verificable sobre beneficio inmediato"
+                rationale = (
+                    "Conflicto resuelto por el maestro interior: la verdad pesa mas que la "
+                    "captura de beneficio."
+                )
+            elif conflict.severity >= 0.7:
+                ruling = "pausar impulso hasta aclarar evidencia y condiciones"
+                rationale = (
+                    "Conflicto resuelto por el maestro interior: la severidad exige reducir "
+                    "velocidad antes de comprometerse."
+                )
+            elif subconscious_output.bias == "boundary":
+                ruling = "proteger limite interno antes de aceptar compromiso"
+                rationale = (
+                    "Conflicto resuelto por el maestro interior: el limite interno condiciona "
+                    "la accion posible."
+                )
+            else:
+                ruling = "permitir avance reversible bajo supervision del criterio"
+                rationale = (
+                    "Conflicto resuelto por el maestro interior: el avance solo es valido si "
+                    "permanece acotado y revisable."
+                )
+
+            resolutions.append(
+                ConflictResolution(
+                    conflict_name=conflict.name,
+                    ruling_layer="maestro_interior",
+                    ruling=ruling,
+                    rationale=rationale,
+                )
+            )
+        return resolutions
+
+    def _build_action_plan(
+        self,
+        final_action: str,
+        criteria: Dict[str, float],
+        subconscious_output: SubconsciousOutput,
+        conflicts: Sequence[Conflict],
+    ) -> List[str]:
+        plan = [final_action]
+
+        if criteria["truth"] < 0.55 or subconscious_output.bias == "integrity":
+            plan.append("separar hechos verificables de promesas o suposiciones")
+            plan.append("comunicar limites con lenguaje directo y comprobable")
+        elif conflicts:
+            plan.append("nombrar el conflicto principal antes de actuar")
+            plan.append("definir una condicion de salida si la decision deja de ser coherente")
+        elif subconscious_output.bias == "confidence":
+            plan.append("avanzar con alcance pequeno y punto de revision cercano")
+        else:
+            plan.append("recopilar la informacion minima antes de una accion irreversible")
+
+        plan.append("revisar la decision contra coherencia, verdad y direccion")
+        return plan

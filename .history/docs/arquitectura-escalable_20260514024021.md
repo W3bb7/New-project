@@ -4,18 +4,18 @@ Khaba Core queda organizado como un sistema cognitivo jerarquico con contratos
 explicitos entre capas. La regla central no cambia: el ego reacciona, el
 subconsciente modula desde memoria y el maestro interior decide con autoridad final.
 
-## Components
+## Componentes
 
 - `DecisionContext`: entrada canonica para todas las capas. Evita que cada modulo
   normalice texto o gestione metadata por su cuenta.
-- `CognitiveProfile`: configuration del sistema. Permite cambiar senales, patrons
+- `CognitiveProfile`: configuracion del sistema. Permite cambiar senales, patrones
   y umbrales sin tocar el orquestador.
 - `Ego`: produce una recomendacion reactiva con urgencia, beneficio, riesgo e influencia.
-- `Subconsciente`: compara la situacion con patrons aprendidos y devuelve sesgo,
+- `Subconsciente`: compara la situacion con patrones aprendidos y devuelve sesgo,
   confianza, modulacion y razones.
-- `ConflictDetector`: detecta tensions entre capas antes de entregar la decision
+- `ConflictDetector`: detecta tensiones entre capas antes de entregar la decision
   al maestro interior.
-- `MaestroInterior`: evalua coherencia, verdad y direction. Puede integrar senales
+- `MaestroInterior`: evalua coherencia, verdad y direccion. Puede integrar senales
   del ego y del subconsciente, pero no queda subordinado a ellas. Tambien emite
   resoluciones explicitas para cada conflicto y un plan de accion.
 - `TraceEvent`: bitacora auditable de cada paso del flujo.
@@ -35,14 +35,14 @@ situation
 ## Puntos de extension
 
 1. Nuevos dominios
-   Crea un `CognitiveProfile` con palabras clave y patrons propios del dominio.
+   Crea un `CognitiveProfile` con palabras clave y patrones propios del dominio.
 
-2. Memoria persistence
-   Sustituye la lista de `MemoryPattern` por patrons cargados desde base de datos,
+2. Memoria persistente
+   Sustituye la lista de `MemoryPattern` por patrones cargados desde base de datos,
    vector store o fichero versionado. La capa `Subconsciente` no necesita cambiar.
 
-3. Politics de conflicto
-   Inyecta otro `ConflictDetector` si el dominio requiere conflicts mas finos,
+3. Politicas de conflicto
+   Inyecta otro `ConflictDetector` si el dominio requiere conflictos mas finos,
    por ejemplo `lealtad_vs_ambicion` o `energia_vs_compromiso`.
 
 4. Criterio superior
@@ -56,8 +56,8 @@ Toda decision final debe conservar:
 - salida del ego
 - salida del subconsciente
 - criterios del maestro interior
-- conflicts detectados
-- conflicts resueltos por el maestro interior
+- conflictos detectados
+- conflictos resueltos por el maestro interior
 - plan de accion
 - contexto original
 - `execution_log` paso a paso

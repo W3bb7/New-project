@@ -18,6 +18,10 @@ class KhabaCoreTests(unittest.TestCase):
         self.assertIn("maestro_interior", decision.trace)
         self.assertIn("execution_log", decision.trace)
         self.assertEqual(decision.trace["execution_log"][-1].layer, "maestro_interior")
+        self.assertGreaterEqual(len(decision.resolved_conflicts), 1)
+        self.assertEqual(decision.resolved_conflicts[0].ruling_layer, "maestro_interior")
+        self.assertIn("verdad", decision.resolved_conflicts[0].ruling)
+        self.assertTrue(any("separar hechos verificables" in step for step in decision.action_plan))
 
     def test_core_rejects_empty_situations(self) -> None:
         core = KhabaCore()
@@ -59,6 +63,21 @@ class KhabaCoreTests(unittest.TestCase):
 
         self.assertEqual(decision.trace["subconsciente"].bias, "boundary")
         self.assertIn("proteger energia", decision.trace["subconsciente"].modulation)
+
+    def test_trace_exposes_action_plan_and_conflict_resolution(self) -> None:
+        core = KhabaCore()
+        decision = core.process(
+            "Quieren lanzar hoy una oferta urgente para ganar un cliente, "
+            "pero hay presion y dudas sobre resultados."
+        )
+
+        maestro_trace = decision.trace["maestro_interior"]
+        final_log = decision.trace["execution_log"][-1]
+
+        self.assertIn("action_plan", maestro_trace)
+        self.assertIn("resolved_conflicts", maestro_trace)
+        self.assertEqual(final_log.data["action_plan"], decision.action_plan)
+        self.assertEqual(final_log.data["resolved_conflicts"][0]["ruling_layer"], "maestro_interior")
 
 
 if __name__ == "__main__":

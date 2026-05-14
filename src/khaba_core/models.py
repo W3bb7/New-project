@@ -138,12 +138,22 @@ class Conflict:
 
 
 @dataclass(frozen=True)
+class ConflictResolution:
+    conflict_name: str
+    ruling_layer: str
+    ruling: str
+    rationale: str
+
+
+@dataclass(frozen=True)
 class FinalDecision:
     final_action: str
     authority: str
     confidence: float
     justification: List[str]
     conflicts: List[Conflict] = field(default_factory=list)
+    resolved_conflicts: List[ConflictResolution] = field(default_factory=list)
+    action_plan: List[str] = field(default_factory=list)
     trace: Dict[str, Any] = field(default_factory=dict)
 
     def to_dict(self) -> Dict[str, Any]:

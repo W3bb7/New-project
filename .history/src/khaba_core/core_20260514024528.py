@@ -139,7 +139,7 @@ class KhabaCore:
             execution_log,
             "conflicts.detect",
             "khaba_core",
-            "Conflicts entre capas detectados.",
+            "Conflictos entre capas detectados.",
             {"conflicts": [asdict(conflict) for conflict in conflicts]},
         )
         self.logger.info("Conflicts detectados: %s", len(conflicts))

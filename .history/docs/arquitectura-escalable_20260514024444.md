@@ -37,12 +37,12 @@ situation
 1. Nuevos dominios
    Crea un `CognitiveProfile` con palabras clave y patrons propios del dominio.
 
-2. Memoria persistence
-   Sustituye la lista de `MemoryPattern` por patrons cargados desde base de datos,
+2. Memoria persistente
+   Sustituye la lista de `MemoryPattern` por patrones cargados desde base de datos,
    vector store o fichero versionado. La capa `Subconsciente` no necesita cambiar.
 
-3. Politics de conflicto
-   Inyecta otro `ConflictDetector` si el dominio requiere conflicts mas finos,
+3. Politicas de conflicto
+   Inyecta otro `ConflictDetector` si el dominio requiere conflictos mas finos,
    por ejemplo `lealtad_vs_ambicion` o `energia_vs_compromiso`.
 
 4. Criterio superior
@@ -56,8 +56,8 @@ Toda decision final debe conservar:
 - salida del ego
 - salida del subconsciente
 - criterios del maestro interior
-- conflicts detectados
-- conflicts resueltos por el maestro interior
+- conflictos detectados
+- conflictos resueltos por el maestro interior
 - plan de accion
 - contexto original
 - `execution_log` paso a paso

@@ -57,7 +57,7 @@ Toda decision final debe conservar:
 - salida del subconsciente
 - criterios del maestro interior
 - conflicts detectados
-- conflicts resueltos por el maestro interior
+- conflictos resueltos por el maestro interior
 - plan de accion
 - contexto original
 - `execution_log` paso a paso

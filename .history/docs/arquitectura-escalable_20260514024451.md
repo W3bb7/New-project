@@ -42,7 +42,7 @@ situation
    vector store o fichero versionado. La capa `Subconsciente` no necesita cambiar.
 
 3. Politics de conflicto
-   Inyecta otro `ConflictDetector` si el dominio requiere conflicts mas finos,
+   Inyecta otro `ConflictDetector` si el dominio requiere conflictos mas finos,
    por ejemplo `lealtad_vs_ambicion` o `energia_vs_compromiso`.
 
 4. Criterio superior
@@ -56,8 +56,8 @@ Toda decision final debe conservar:
 - salida del ego
 - salida del subconsciente
 - criterios del maestro interior
-- conflicts detectados
-- conflicts resueltos por el maestro interior
+- conflictos detectados
+- conflictos resueltos por el maestro interior
 - plan de accion
 - contexto original
 - `execution_log` paso a paso
