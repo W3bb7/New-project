@@ -3,10 +3,6 @@
     {
       "name": "Khaba Core",
       "path": "."
-    },
-    {
-      "name": "4D4M",
-      "path": "../PlatformIO/Projects/4D4M"
     }
   ],
   "settings": {
